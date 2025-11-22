@@ -14,7 +14,6 @@
             --text-primary: #1c1c1e;
             --text-secondary: #8e8e93;
             --accent-color: #007aff;
-            --danger-color: #ff3b30;
             --border-color: #c6c6c8;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             --radius: 14px;
@@ -36,14 +35,12 @@
             display: none;
             flex-direction: column;
             flex-grow: 1;
+            padding: 20px;
             animation: fadeIn 0.3s ease-in-out;
         }
+
         .view.active {
             display: flex;
-        }
-        
-        #editor-view {
-            height: 100vh;
         }
 
         @keyframes fadeIn {
@@ -57,12 +54,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding: 20px;
+            padding: 0 10px;
         }
+
         #notes-list-view h1 {
             font-size: 2rem;
             font-weight: 700;
         }
+
         .btn-icon {
             background: none;
             border: none;
@@ -78,30 +77,33 @@
             justify-content: center;
             transition: background-color 0.2s;
         }
+
         .btn-icon:hover {
             background-color: rgba(0, 122, 255, 0.1);
         }
+
         #notes-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 15px;
-            padding: 0 20px 20px 20px;
         }
+
         .note-card {
             background-color: var(--bg-primary);
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: var(--shadow);
+            cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             border: 1px solid var(--border-color);
             text-align: left;
-            position: relative;
-            cursor: pointer;
         }
+
         .note-card:hover {
             transform: scale(1.02);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
+
         .note-card h3 {
             margin: 0 0 8px 0;
             font-size: 1.1rem;
@@ -110,6 +112,7 @@
             align-items: center;
             gap: 8px;
         }
+
         .note-card p {
             margin: 0;
             color: var(--text-secondary);
@@ -118,34 +121,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .note-card .date {
             font-size: 0.8rem;
             margin-top: 10px;
             color: var(--text-secondary);
-        }
-        .note-card .actions {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-        }
-        .note-card .btn-small {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 5px;
-            color: var(--text-secondary);
-            transition: color 0.2s, background-color 0.2s;
-        }
-        .note-card .btn-small:hover {
-            color: var(--text-primary);
-            background-color: var(--bg-secondary);
-        }
-        .note-card .btn-small.delete:hover {
-            color: var(--danger-color);
         }
 
         /* --- Editor View --- */
@@ -153,19 +133,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
+            padding: 10px;
+            margin-bottom: 15px;
         }
+
         #editor-view .nav-bar {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         #editor-view .actions {
             display: flex;
             gap: 10px;
         }
+
         #editor-view .btn-text {
             background: none;
             border: none;
@@ -177,40 +159,42 @@
             border-radius: calc(var(--radius) / 2);
             transition: background-color 0.2s;
         }
+
         #editor-view .btn-text:hover {
             background-color: rgba(0, 122, 255, 0.1);
         }
-        #editor-view main {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
+
         #note-title-input {
             font-size: 1.5rem;
             font-weight: 600;
             border: 1px solid transparent;
             background: none;
-            padding: 15px 20px;
-            border-radius: 0;
+            padding: 5px;
+            border-radius: 5px;
             width: 100%;
-            flex-shrink: 0;
+            margin-bottom: 15px;
         }
+
         #note-title-input:focus {
             outline: none;
             border-color: var(--border-color);
             background-color: var(--bg-primary);
         }
+
         #note-content {
             width: 100%;
             flex-grow: 1;
             border: none;
             background-color: var(--bg-primary);
+            border-radius: var(--radius);
             padding: 20px;
             font-size: 1rem;
             font-family: inherit;
             line-height: 1.6;
             resize: none;
+            box-shadow: var(--shadow);
         }
+
         #note-content:focus {
             outline: none;
         }
@@ -229,9 +213,11 @@
             z-index: 1000;
             animation: fadeIn 0.2s ease-in-out;
         }
+
         .modal-overlay.active {
             display: flex;
         }
+
         .modal-content {
             background-color: var(--bg-primary);
             padding: 30px;
@@ -241,18 +227,22 @@
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
             text-align: left;
         }
+
         .modal-content h2 {
             margin-top: 0;
             margin-bottom: 20px;
         }
+
         .modal-content .form-group {
             margin-bottom: 20px;
         }
+
         .modal-content label {
             display: block;
             font-weight: 500;
             margin-bottom: 8px;
         }
+
         .modal-content input {
             width: 100%;
             padding: 12px;
@@ -261,16 +251,38 @@
             font-size: 1rem;
             font-family: inherit;
         }
+
         .modal-content input:focus {
             outline: none;
             border-color: var(--accent-color);
         }
+
+        .generated-link {
+            background-color: var(--bg-secondary);
+            padding: 15px;
+            border-radius: calc(var(--radius) / 2);
+            word-break: break-all;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .generated-link p {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .generated-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
         }
+        
         .btn {
             padding: 10px 20px;
             border: none;
@@ -280,23 +292,19 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
+
         .btn-primary {
             background-color: var(--accent-color);
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #0051d5;
         }
+
         .btn-secondary {
             background-color: var(--bg-secondary);
             color: var(--text-primary);
-        }
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #d70015;
         }
     </style>
 </head>
@@ -330,56 +338,26 @@
         </main>
     </div>
 
-    <!-- Save Modal -->
-    <div id="save-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>ট্রেতে সেভ করুন</h2>
-            <p>এই নোটটি আপনার পাবলিক নোটের তালিকায় যুক্ত হবে। পাসওয়ার্ড দিলে কন্টেন্ট এনক্রিপ্টেড থাকবে।</p>
-            <div class="form-group">
-                <label for="save-password">পাসওয়ার্ড (ঐচ্ছিক)</label>
-                <input type="password" id="save-password" placeholder="একটি পাসওয়ার্ড সেট করুন">
-            </div>
-            <div class="modal-actions">
-                <button id="close-save-modal-btn" class="btn btn-secondary">বাতিল</button>
-                <button id="confirm-save-btn" class="btn btn-primary">নিশ্চিত সেভ</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Share Modal -->
     <div id="share-modal" class="modal-overlay">
         <div class="modal-content">
-            <h2>শেয়ারযোগ্য লিংক তৈরি করুন</h2>
+            <h2>নোট শেয়ার করুন</h2>
             <div class="form-group">
-                <label for="share-custom-link">কাস্টম লিংক (আবশ্যক)</label>
-                <input type="text" id="share-custom-link" placeholder="my-project-notes" required>
+                <label for="share-link-name">লিংকের নাম (কাস্টমাইজ করুন)</label>
+                <input type="text" id="share-link-name" placeholder="my-project-notes">
             </div>
             <div class="form-group">
                 <label for="share-password">পাসওয়ার্ড (ঐচ্ছিক)</label>
                 <input type="password" id="share-password" placeholder="একটি পাসওয়ার্ড সেট করুন">
             </div>
-            <div class="form-group" id="generated-link-div" style="display:none;">
+            <div class="generated-link" id="generated-link-div">
                 <p>আপনার শেয়ারযোগ্য লিংক:</p>
-                <input type="text" id="generated-link" readonly>
+                <a href="#" id="generated-link" target="_blank"></a>
+                <button id="copy-link-btn" class="btn btn-secondary" style="margin-top:10px;">কপি করুন</button>
             </div>
             <div class="modal-actions">
-                <button id="close-share-modal-btn" class="btn btn-secondary">বন্ধ করুন</button>
+                <button id="close-modal-btn" class="btn btn-secondary">বন্ধ করুন</button>
                 <button id="generate-link-btn" class="btn btn-primary">লিংক তৈরি করুন</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Password Prompt Modal -->
-    <div id="password-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="password-modal-title">পাসওয়ার্ড প্রয়োজন</h2>
-            <p id="password-modal-prompt">এই নোটটি পাসওয়ার্ড দ্বারা সুরক্ষিত। অনুগ্রহ করে পাসওয়ার্ড লিখুন।</p>
-            <div class="form-group">
-                <input type="password" id="prompt-password" placeholder="পাসওয়ার্ড লিখুন">
-            </div>
-            <div class="modal-actions">
-                <button id="cancel-password-btn" class="btn btn-secondary">বাতিল</button>
-                <button id="submit-password-btn" class="btn btn-primary">আনলক করুন</button>
             </div>
         </div>
     </div>
@@ -389,9 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const notesListView = document.getElementById('notes-list-view');
     const editorView = document.getElementById('editor-view');
-    const saveModal = document.getElementById('save-modal');
     const shareModal = document.getElementById('share-modal');
-    const passwordModal = document.getElementById('password-modal');
 
     const notesContainer = document.getElementById('notes-container');
     const newNoteBtn = document.getElementById('new-note-btn');
@@ -402,231 +378,168 @@ document.addEventListener('DOMContentLoaded', () => {
     const noteTitleInput = document.getElementById('note-title-input');
     const noteContentTextarea = document.getElementById('note-content');
 
-    const savePasswordInput = document.getElementById('save-password');
-    const confirmSaveBtn = document.getElementById('confirm-save-btn');
-    const closeSaveModalBtn = document.getElementById('close-save-modal-btn');
-
-    const shareCustomLinkInput = document.getElementById('share-custom-link');
+    const shareLinkNameInput = document.getElementById('share-link-name');
     const sharePasswordInput = document.getElementById('share-password');
     const generateLinkBtn = document.getElementById('generate-link-btn');
-    const closeShareModalBtn = document.getElementById('close-share-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const copyLinkBtn = document.getElementById('copy-link-btn');
     const generatedLinkDiv = document.getElementById('generated-link-div');
-    const generatedLinkInput = document.getElementById('generated-link');
-
-    const passwordModalTitle = document.getElementById('password-modal-title');
-    const passwordModalPrompt = document.getElementById('password-modal-prompt');
-    const promptPasswordInput = document.getElementById('prompt-password');
-    const submitPasswordBtn = document.getElementById('submit-password-btn');
-    const cancelPasswordBtn = document.getElementById('cancel-password-btn');
+    const generatedLinkAnchor = document.getElementById('generated-link');
 
     // --- State ---
-    let currentNoteData = { title: '', content: '' };
     let currentNoteId = null;
-    let publicNotesList = [];
-    
-    // --- Crypto Functions ---
-    async function encrypt(text, password) {
-        if (!password) return btoa(text); // Fallback to btoa if no password
-        const encoder = new TextEncoder();
-        const data = encoder.encode(text);
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
-        const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
-        const encryptedData = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
-        const package = { salt: Array.from(salt), iv: Array.from(iv), data: Array.from(new Uint8Array(encryptedData)) };
-        return btoa(JSON.stringify(package));
-    }
-
-    async function decrypt(encryptedB64, password) {
-        if (!password) return atob(encryptedB64); // Fallback for btoa
-        try {
-            const encoder = new TextEncoder();
-            const decoder = new TextDecoder();
-            const pkg = JSON.parse(atob(encryptedB64));
-            const salt = new Uint8Array(pkg.salt);
-            const iv = new Uint8Array(pkg.iv);
-            const data = new Uint8Array(pkg.data);
-            const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
-            const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-            const decryptedData = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
-            return decoder.decode(decryptedData);
-        } catch (e) {
-            return null; // Wrong password
-        }
-    }
+    const NOTES_KEY = 'securePadNotes';
 
     // --- Core Functions ---
-    function showView(view) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); view.classList.add('active'); }
-    function showModal(modal) { modal.classList.add('active'); }
-    function hideModal(modal) { modal.classList.remove('active'); }
-    
+    function getNotes() {
+        const notes = localStorage.getItem(NOTES_KEY);
+        return notes ? JSON.parse(notes) : {};
+    }
+
+    function saveNotes(notes) {
+        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+    }
+
+    function showView(view) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        view.classList.add('active');
+    }
+
     function renderNotesList() {
+        const notes = getNotes();
         notesContainer.innerHTML = '';
-        if (publicNotesList.length === 0) {
-            notesContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; color: var(--text-secondary); padding: 40px;">কোনো নোট নেই। "+" বাটনে ক্লিক করে নতুন নোট তৈরি করুন।</p>';
+        const noteIds = Object.keys(notes).sort((a, b) => notes[b].lastModified - notes[a].lastModified);
+
+        if (noteIds.length === 0) {
+            notesContainer.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">কোনো নোট নেই। "+" বাটনে ক্লিক করে নতুন নোট তৈরি করুন।</p>';
             return;
         }
-        publicNotesList.forEach(note => {
+
+        noteIds.forEach(id => {
+            const note = notes[id];
             const card = document.createElement('div');
             card.className = 'note-card';
-            const preview = note.isPasswordProtected ? "পাসওয়ার্ড দ্বারা সুরক্ষিত..." : note.content.substring(0, 100);
             card.innerHTML = `
-                <div class="actions"><button class="btn-small delete" title="ডিলিট করুন">🗑️</button></div>
-                <h3>${note.title} ${note.isPasswordProtected ? '🔒' : ''}</h3>
-                <p>${preview}...</p>
+                <h3>${note.title} ${note.password ? '🔒' : ''}</h3>
+                <p>${note.content.substring(0, 100)}...</p>
                 <div class="date">${new Date(note.lastModified).toLocaleDateString('bn-BD')}</div>
             `;
-            card.addEventListener('click', () => loadNoteFromTray(note));
-            card.querySelector('.delete').addEventListener('click', (e) => { e.stopPropagation(); deleteNoteFromTray(note); });
+            card.addEventListener('click', () => openNote(id));
             notesContainer.appendChild(card);
         });
     }
 
-    async function loadNoteFromTray(note) {
-        if (note.isPasswordProtected) {
-            passwordModalTitle.textContent = 'নোট খোলার জন্য পাসওয়ার্ড দিন';
-            passwordModalPrompt.textContent = `"${note.title}" নোটটি দেখতে পাসওয়ার্ড লিখুন।`;
-            showModal(passwordModal);
-            submitPasswordBtn.onclick = async () => {
-                const content = await decrypt(note.encryptedContent, promptPasswordInput.value);
-                if (content !== null) {
-                    hideModal(passwordModal);
-                    openEditor(note.id, note.title, content);
-                } else { alert('ভুল পাসওয়ার্ড!'); }
-            };
-        } else {
-            openEditor(note.id, note.title, note.content);
-        }
-    }
+    function openNote(id) {
+        const notes = getNotes();
+        const note = notes[id];
+        if (!note) return;
 
-    function openEditor(id, title, content) {
         currentNoteId = id;
-        currentNoteData = { title, content };
-        noteTitleInput.value = title;
-        noteContentTextarea.value = content;
+        noteTitleInput.value = note.title;
+        noteContentTextarea.value = note.content;
         showView(editorView);
     }
 
-    async function deleteNoteFromTray(noteToDelete) {
-        const performDelete = () => {
-            publicNotesList = publicNotesList.filter(n => n.id !== noteToDelete.id);
-            updateTrayURL();
-            renderNotesList();
-        };
-        if (noteToDelete.isPasswordProtected) {
-            passwordModalTitle.textContent = 'ডিলিট করার জন্য পাসওয়ার্ড দিন';
-            passwordModalPrompt.textContent = `"${noteToDelete.title}" নোটটি ডিলিট করতে পাসওয়ার্ড দিন।`;
-            showModal(passwordModal);
-            submitPasswordBtn.onclick = async () => {
-                const content = await decrypt(noteToDelete.encryptedContent, promptPasswordInput.value);
-                if (content !== null) { hideModal(passwordModal); performDelete(); }
-                else { alert('ভুল পাসওয়ার্ড!'); }
-            };
-        } else {
-            if (confirm(`"${noteToDelete.title}" নোটটি ডিলিট করতে চান?`)) { performDelete(); }
+    function saveCurrentNote() {
+        if (!currentNoteId) {
+            alert('প্রথমে একটি নোট তৈরি করুন বা নির্বাচন করুন।');
+            return;
         }
-    }
-
-    async function saveToTray() {
-        const password = savePasswordInput.value;
-        const title = noteTitleInput.value.trim() || 'Untitled';
-        const content = noteContentTextarea.value;
-        const noteId = currentNoteId || `note-${Date.now()}`;
+        const notes = getNotes();
+        if (!notes[currentNoteId]) return; // Should not happen
         
-        const noteListItem = {
-            id: noteId,
-            title: title,
-            lastModified: Date.now(),
-            isPasswordProtected: !!password
-        };
-
-        if (password) {
-            noteListItem.encryptedContent = await encrypt(content, password);
-        } else {
-            noteListItem.content = content;
-        }
-
-        const existingIndex = publicNotesList.findIndex(n => n.id === noteId);
-        if (existingIndex > -1) {
-            publicNotesList[existingIndex] = noteListItem;
-        } else {
-            publicNotesList.unshift(noteListItem);
-        }
+        notes[currentNoteId].title = noteTitleInput.value.trim() || 'Untitled';
+        notes[currentNoteId].content = noteContentTextarea.value;
+        notes[currentNoteId].lastModified = Date.now();
         
-        currentNoteId = noteId;
-        hideModal(saveModal);
-        updateTrayURL();
-        renderNotesList();
-        showView(notesListView);
-    }
-    
-    function updateTrayURL() {
-        const data = btoa(JSON.stringify(publicNotesList));
-        window.location.hash = data;
-    }
-
-    async function generateShareableLink() {
-        const customLink = shareCustomLinkInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-        if (!customLink) { alert('অনুগ্রহ করে একটি কাস্টম লিংক দিন।'); return; }
-        
-        const password = sharePasswordInput.value;
-        const noteData = { title: noteTitleInput.value.trim() || 'Untitled', content: noteContentTextarea.value, password };
-        const encryptedBlob = await encrypt(JSON.stringify(noteData), password);
-        
-        const shareUrl = `${window.location.origin + window.location.pathname.replace(/\/$/, '')}#/${customLink}/${encryptedBlob}`;
-        generatedLinkInput.value = shareUrl;
-        generatedLinkDiv.style.display = 'block';
-    }
-
-    async function loadFromURL() {
-        const hash = window.location.hash.substring(1);
-        if (hash.startsWith('/')) { // It's a shareable link
-            const parts = hash.split('/');
-            if (parts.length >= 3) {
-                const encryptedBlob = parts.slice(2).join('/');
-                try {
-                    let noteData;
-                    try { // Try to decrypt
-                        showModal(passwordModal);
-                        submitPasswordBtn.onclick = async () => {
-                            const decryptedString = await decrypt(encryptedBlob, promptPasswordInput.value);
-                            if (decryptedString !== null) {
-                                hideModal(passwordModal);
-                                noteData = JSON.parse(decryptedString);
-                                openEditor(null, noteData.title, noteData.content);
-                            } else { alert('ভুল পাসওয়ার্ড!'); }
-                        };
-                    } catch (e) { // Not encrypted
-                        noteData = JSON.parse(atob(encryptedBlob));
-                        openEditor(null, noteData.title, noteData.content);
-                    }
-                } catch (e) { alert("লিংকটি সঠিক নয়।"); window.location.hash = ''; loadFromURL(); }
-                return;
-            }
-        }
-        // It's the public tray list
-        try { publicNotesList = JSON.parse(atob(hash || '[]')); } catch (e) { publicNotesList = []; }
-        renderNotesList();
-        showView(notesListView);
+        saveNotes(notes);
+        saveBtn.textContent = 'সেভ হয়েছে!';
+        setTimeout(() => saveBtn.textContent = 'সেভ করুন', 1500);
     }
 
     // --- Event Listeners ---
-    newNoteBtn.addEventListener('click', () => openEditor(null, 'নতুন নোট', ''));
-    backToListBtn.addEventListener('click', () => { window.location.hash = ''; loadFromURL(); });
-    saveBtn.addEventListener('click', () => { savePasswordInput.value = ''; showModal(saveModal); });
-    shareBtn.addEventListener('click', () => { shareCustomLinkInput.value = ''; sharePasswordInput.value = ''; generatedLinkDiv.style.display='none'; showModal(shareModal); });
-    
-    confirmSaveBtn.addEventListener('click', saveToTray);
-    closeSaveModalBtn.addEventListener('click', () => hideModal(saveModal));
-    generateLinkBtn.addEventListener('click', generateShareableLink);
-    closeShareModalBtn.addEventListener('click', () => hideModal(shareModal));
-    cancelPasswordBtn.addEventListener('click', () => hideModal(passwordModal));
-    
-    generatedLinkInput.addEventListener('click', () => { generatedLinkInput.select(); navigator.clipboard.writeText(generatedLinkInput.value).then(() => alert('লিংক কপি হয়েছে!')); });
+    newNoteBtn.addEventListener('click', () => {
+        const newId = 'note-' + Date.now();
+        const notes = getNotes();
+        notes[newId] = { title: 'নতুন নোট', content: '', password: '', lastModified: Date.now() };
+        saveNotes(notes);
+        openNote(newId);
+    });
+
+    backToListBtn.addEventListener('click', () => {
+        saveCurrentNote();
+        renderNotesList();
+        showView(notesListView);
+    });
+
+    saveBtn.addEventListener('click', saveCurrentNote);
+
+    shareBtn.addEventListener('click', () => {
+        if (!currentNoteId) {
+            alert('শেয়ার করার জন্য একটি নোট সেভ করুন।');
+            return;
+        }
+        const notes = getNotes();
+        const note = notes[currentNoteId];
+        shareLinkNameInput.value = note.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        sharePasswordInput.value = note.password || '';
+        generatedLinkDiv.style.display = 'none';
+        shareModal.classList.add('active');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        shareModal.classList.remove('active');
+    });
+
+    generateLinkBtn.addEventListener('click', () => {
+        const linkName = shareLinkNameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+        if (!linkName) {
+            alert('লিংকের জন্য একটি নাম দিন।');
+            return;
+        }
+        const password = sharePasswordInput.value;
+        
+        const notes = getNotes();
+        // Rename the note if link name changed
+        if (currentNoteId !== linkName) {
+            notes[linkName] = { ...notes[currentNoteId] };
+            delete notes[currentNoteId];
+            currentNoteId = linkName;
+        }
+        notes[linkName].password = password;
+        saveNotes(notes);
+        
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+        const shareUrl = `${baseUrl}/${linkName}`;
+        
+        generatedLinkAnchor.href = shareUrl;
+        generatedLinkAnchor.textContent = shareUrl;
+        generatedLinkDiv.style.display = 'block';
+    });
+
+    copyLinkBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(generatedLinkAnchor.href).then(() => {
+            copyLinkBtn.textContent = 'কপি হয়েছে!';
+            setTimeout(() => copyLinkBtn.textContent = 'কপি করুন', 2000);
+        });
+    });
 
     // --- Initial Load ---
-    loadFromURL();
+    function initializeApp() {
+        // Check if a specific note is requested in the URL
+        const pathParts = window.location.pathname.split('/').filter(p => p);
+        const requestedNoteId = pathParts[pathParts.length - 1];
+        const notes = getNotes();
+
+        if (requestedNoteId && notes[requestedNoteId]) {
+            openNote(requestedNoteId);
+        } else {
+            renderNotesList();
+            showView(notesListView);
+        }
+    }
+    
+    initializeApp();
 });
 </script>
 
