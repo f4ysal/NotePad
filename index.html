@@ -330,10 +330,26 @@
         </main>
     </div>
 
+    <!-- Save Modal -->
+    <div id="save-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>ট্রেতে সেভ করুন</h2>
+            <p>এই নোটটি আপনার পাবলিক নোটের তালিকায় যুক্ত হবে। পাসওয়ার্ড দিলে কন্টেন্ট এনক্রিপ্টেড থাকবে।</p>
+            <div class="form-group">
+                <label for="save-password">পাসওয়ার্ড (ঐচ্ছিক)</label>
+                <input type="password" id="save-password" placeholder="একটি পাসওয়ার্ড সেট করুন">
+            </div>
+            <div class="modal-actions">
+                <button id="close-save-modal-btn" class="btn btn-secondary">বাতিল</button>
+                <button id="confirm-save-btn" class="btn btn-primary">নিশ্চিত সেভ</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Share Modal -->
     <div id="share-modal" class="modal-overlay">
         <div class="modal-content">
-            <h2>নোট শেয়ার করুন</h2>
+            <h2>শেয়ারযোগ্য লিংক তৈরি করুন</h2>
             <div class="form-group">
                 <label for="share-custom-link">কাস্টম লিংক (আবশ্যক)</label>
                 <input type="text" id="share-custom-link" placeholder="my-project-notes" required>
@@ -373,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const notesListView = document.getElementById('notes-list-view');
     const editorView = document.getElementById('editor-view');
+    const saveModal = document.getElementById('save-modal');
     const shareModal = document.getElementById('share-modal');
     const passwordModal = document.getElementById('password-modal');
 
@@ -384,6 +401,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const noteTitleInput = document.getElementById('note-title-input');
     const noteContentTextarea = document.getElementById('note-content');
+
+    const savePasswordInput = document.getElementById('save-password');
+    const confirmSaveBtn = document.getElementById('confirm-save-btn');
+    const closeSaveModalBtn = document.getElementById('close-save-modal-btn');
 
     const shareCustomLinkInput = document.getElementById('share-custom-link');
     const sharePasswordInput = document.getElementById('share-password');
@@ -399,113 +420,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelPasswordBtn = document.getElementById('cancel-password-btn');
 
     // --- State ---
-    let currentNoteData = { title: '', content: '', password: '' };
-    let currentNoteId = null; // Unique ID for notes in the tray
+    let currentNoteData = { title: '', content: '' };
+    let currentNoteId = null;
     let publicNotesList = [];
     
     // --- Crypto Functions ---
     async function encrypt(text, password) {
+        if (!password) return btoa(text); // Fallback to btoa if no password
         const encoder = new TextEncoder();
         const data = encoder.encode(text);
         const salt = crypto.getRandomValues(new Uint8Array(16));
         const iv = crypto.getRandomValues(new Uint8Array(12));
-
-        const key = await crypto.subtle.importKey(
-            'raw',
-            encoder.encode(password),
-            { name: 'PBKDF2' },
-            false,
-            ['deriveBits', 'deriveKey']
-        );
-
-        const derivedKey = await crypto.subtle.deriveKey(
-            { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-            key,
-            { name: 'AES-GCM', length: 256 },
-            false,
-            ['encrypt']
-        );
-
-        const encryptedData = await crypto.subtle.encrypt(
-            { name: 'AES-GCM', iv },
-            derivedKey,
-            data
-        );
-
-        const encryptedPackage = {
-            salt: Array.from(salt).map(b => String.fromCharCode(b)).join(''),
-            iv: Array.from(iv).map(b => String.fromCharCode(b)).join(''),
-            data: Array.from(new Uint8Array(encryptedData)).map(b => String.fromCharCode(b)).join('')
-        };
-        return btoa(JSON.stringify(encryptedPackage));
+        const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
+        const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+        const encryptedData = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+        const package = { salt: Array.from(salt), iv: Array.from(iv), data: Array.from(new Uint8Array(encryptedData)) };
+        return btoa(JSON.stringify(package));
     }
 
-    async function decrypt(encryptedPackageB64, password) {
+    async function decrypt(encryptedB64, password) {
+        if (!password) return atob(encryptedB64); // Fallback for btoa
         try {
             const encoder = new TextEncoder();
             const decoder = new TextDecoder();
-            const encryptedPackage = JSON.parse(atob(encryptedPackageB64));
-            const salt = new Uint8Array(encryptedPackage.salt.split('').map(c => c.charCodeAt(0)));
-            const iv = new Uint8Array(encryptedPackage.iv.split('').map(c => c.charCodeAt(0)));
-            const data = new Uint8Array(encryptedPackage.data.split('').map(c => c.charCodeAt(0)));
-
-            const key = await crypto.subtle.importKey(
-                'raw',
-                encoder.encode(password),
-                { name: 'PBKDF2' },
-                false,
-                ['deriveBits', 'deriveKey']
-            );
-
-            const derivedKey = await crypto.subtle.deriveKey(
-                { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-                key,
-                { name: 'AES-GCM', length: 256 },
-                false,
-                ['decrypt']
-            );
-
-            const decryptedData = await crypto.subtle.decrypt(
-                { name: 'AES-GCM', iv },
-                derivedKey,
-                data
-            );
-
+            const pkg = JSON.parse(atob(encryptedB64));
+            const salt = new Uint8Array(pkg.salt);
+            const iv = new Uint8Array(pkg.iv);
+            const data = new Uint8Array(pkg.data);
+            const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
+            const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+            const decryptedData = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
             return decoder.decode(decryptedData);
         } catch (e) {
-            console.error("Decryption failed:", e);
-            return null; // Indicates wrong password or corrupted data
+            return null; // Wrong password
         }
     }
 
     // --- Core Functions ---
-    function showView(view) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        view.classList.add('active');
-    }
-
-    function showModal(modal) {
-        modal.classList.add('active');
-    }
-
-    function hideModal(modal) {
-        modal.classList.remove('active');
-    }
-
-    function getHashData() {
-        const hash = window.location.hash.substring(1);
-        if (!hash) return null;
-        try {
-            return JSON.parse(atob(hash));
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function setHashData(data) {
-        const encryptedData = btoa(JSON.stringify(data));
-        window.location.hash = encryptedData;
-    }
+    function showView(view) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); view.classList.add('active'); }
+    function showModal(modal) { modal.classList.add('active'); }
+    function hideModal(modal) { modal.classList.remove('active'); }
     
     function renderNotesList() {
         notesContainer.innerHTML = '';
@@ -513,68 +467,75 @@ document.addEventListener('DOMContentLoaded', () => {
             notesContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center; color: var(--text-secondary); padding: 40px;">কোনো নোট নেই। "+" বাটনে ক্লিক করে নতুন নোট তৈরি করুন।</p>';
             return;
         }
-
         publicNotesList.forEach(note => {
             const card = document.createElement('div');
             card.className = 'note-card';
             const preview = note.isPasswordProtected ? "পাসওয়ার্ড দ্বারা সুরক্ষিত..." : note.content.substring(0, 100);
             card.innerHTML = `
-                <div class="actions">
-                    <button class="btn-small delete" title="ডিলিট করুন">🗑️</button>
-                </div>
+                <div class="actions"><button class="btn-small delete" title="ডিলিট করুন">🗑️</button></div>
                 <h3>${note.title} ${note.isPasswordProtected ? '🔒' : ''}</h3>
                 <p>${preview}...</p>
                 <div class="date">${new Date(note.lastModified).toLocaleDateString('bn-BD')}</div>
             `;
-            
-            card.addEventListener('click', () => {
-                window.location.href = note.shareableLink;
-            });
-
-            card.querySelector('.delete').addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteNoteFromList(note);
-            });
-
+            card.addEventListener('click', () => loadNoteFromTray(note));
+            card.querySelector('.delete').addEventListener('click', (e) => { e.stopPropagation(); deleteNoteFromTray(note); });
             notesContainer.appendChild(card);
         });
     }
 
-    function deleteNoteFromList(noteToDelete) {
+    async function loadNoteFromTray(note) {
+        if (note.isPasswordProtected) {
+            passwordModalTitle.textContent = 'নোট খোলার জন্য পাসওয়ার্ড দিন';
+            passwordModalPrompt.textContent = `"${note.title}" নোটটি দেখতে পাসওয়ার্ড লিখুন।`;
+            showModal(passwordModal);
+            submitPasswordBtn.onclick = async () => {
+                const content = await decrypt(note.encryptedContent, promptPasswordInput.value);
+                if (content !== null) {
+                    hideModal(passwordModal);
+                    openEditor(note.id, note.title, content);
+                } else { alert('ভুল পাসওয়ার্ড!'); }
+            };
+        } else {
+            openEditor(note.id, note.title, note.content);
+        }
+    }
+
+    function openEditor(id, title, content) {
+        currentNoteId = id;
+        currentNoteData = { title, content };
+        noteTitleInput.value = title;
+        noteContentTextarea.value = content;
+        showView(editorView);
+    }
+
+    async function deleteNoteFromTray(noteToDelete) {
         const performDelete = () => {
             publicNotesList = publicNotesList.filter(n => n.id !== noteToDelete.id);
-            setHashData(publicNotesList);
+            updateTrayURL();
             renderNotesList();
         };
-
         if (noteToDelete.isPasswordProtected) {
             passwordModalTitle.textContent = 'ডিলিট করার জন্য পাসওয়ার্ড দিন';
             passwordModalPrompt.textContent = `"${noteToDelete.title}" নোটটি ডিলিট করতে পাসওয়ার্ড দিন।`;
-            promptPasswordInput.value = '';
             showModal(passwordModal);
-            
             submitPasswordBtn.onclick = async () => {
-                if (await decrypt(noteToDelete.encryptedContent, promptPasswordInput.value) !== null) {
-                    hideModal(passwordModal);
-                    performDelete();
-                } else {
-                    alert('ভুল পাসওয়ার্ড!');
-                }
+                const content = await decrypt(noteToDelete.encryptedContent, promptPasswordInput.value);
+                if (content !== null) { hideModal(passwordModal); performDelete(); }
+                else { alert('ভুল পাসওয়ার্ড!'); }
             };
         } else {
-            if (confirm(`"${noteToDelete.title}" নোটটি ডিলিট করতে চান?`)) {
-                performDelete();
-            }
+            if (confirm(`"${noteToDelete.title}" নোটটি ডিলিট করতে চান?`)) { performDelete(); }
         }
     }
 
     async function saveToTray() {
+        const password = savePasswordInput.value;
         const title = noteTitleInput.value.trim() || 'Untitled';
         const content = noteContentTextarea.value;
-        const password = currentNoteData.password;
-
-        let noteListItem = {
-            id: currentNoteId || `note-${Date.now()}`,
+        const noteId = currentNoteId || `note-${Date.now()}`;
+        
+        const noteListItem = {
+            id: noteId,
             title: title,
             lastModified: Date.now(),
             isPasswordProtected: !!password
@@ -585,144 +546,84 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             noteListItem.content = content;
         }
-        
-        // Update or add to list
-        const existingIndex = publicNotesList.findIndex(n => n.id === noteListItem.id);
+
+        const existingIndex = publicNotesList.findIndex(n => n.id === noteId);
         if (existingIndex > -1) {
             publicNotesList[existingIndex] = noteListItem;
         } else {
             publicNotesList.unshift(noteListItem);
-            currentNoteId = noteListItem.id; // Assign ID to the current note
         }
         
-        setHashData(publicNotesList);
-        saveBtn.textContent = 'সেভ হয়েছে!';
-        setTimeout(() => saveBtn.textContent = 'সেভ করুন', 2000);
+        currentNoteId = noteId;
+        hideModal(saveModal);
+        updateTrayURL();
+        renderNotesList();
+        showView(notesListView);
+    }
+    
+    function updateTrayURL() {
+        const data = btoa(JSON.stringify(publicNotesList));
+        window.location.hash = data;
     }
 
     async function generateShareableLink() {
         const customLink = shareCustomLinkInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        if (!customLink) { alert('অনুগ্রহ করে একটি কাস্টম লিংক দিন।'); return; }
+        
         const password = sharePasswordInput.value;
+        const noteData = { title: noteTitleInput.value.trim() || 'Untitled', content: noteContentTextarea.value, password };
+        const encryptedBlob = await encrypt(JSON.stringify(noteData), password);
         
-        if (!customLink) {
-            alert('অনুগ্রহ করে একটি কাস্টম লিংক দিন।');
-            return;
-        }
-
-        const noteDataToShare = {
-            title: noteTitleInput.value.trim() || 'Untitled',
-            content: noteContentTextarea.value,
-            password: password
-        };
-
-        let encryptedDataBlob;
-        if (password) {
-            encryptedDataBlob = await encrypt(JSON.stringify(noteDataToShare), password);
-        } else {
-            encryptedDataBlob = btoa(JSON.stringify(noteDataToShare));
-        }
-        
-        const shareUrl = `${window.location.origin + window.location.pathname.replace(/\/$/, '')}#/${customLink}/${encryptedDataBlob}`;
-        
+        const shareUrl = `${window.location.origin + window.location.pathname.replace(/\/$/, '')}#/${customLink}/${encryptedBlob}`;
         generatedLinkInput.value = shareUrl;
         generatedLinkDiv.style.display = 'block';
-        generateLinkBtn.textContent = 'লিংক তৈরি হয়েছে!';
-        setTimeout(() => generateLinkBtn.textContent = 'লিংক তৈরি করুন', 2000);
     }
 
     async function loadFromURL() {
         const hash = window.location.hash.substring(1);
-
-        // Check if it's a custom note link
-        if (hash.startsWith('/')) {
+        if (hash.startsWith('/')) { // It's a shareable link
             const parts = hash.split('/');
             if (parts.length >= 3) {
-                const encryptedDataBlob = parts.slice(2).join('/');
-                
+                const encryptedBlob = parts.slice(2).join('/');
                 try {
-                    let decryptedData;
-                    // Try to parse as non-encrypted first
-                    try {
-                        decryptedData = JSON.parse(atob(encryptedDataBlob));
-                    } catch (e) {
-                        // If it fails, it must be encrypted
+                    let noteData;
+                    try { // Try to decrypt
                         showModal(passwordModal);
-                        passwordModalTitle.textContent = 'পাসওয়ার্ড প্রয়োজন';
-                        passwordModalPrompt.textContent = 'এই নোটটি পাসওয়ার্ড দ্বারা সুরক্ষিত। অনুগ্রহ করে পাসওয়ার্ড লিখুন।';
-                        
                         submitPasswordBtn.onclick = async () => {
-                            const decryptedString = await decrypt(encryptedDataBlob, promptPasswordInput.value);
+                            const decryptedString = await decrypt(encryptedBlob, promptPasswordInput.value);
                             if (decryptedString !== null) {
-                                decryptedData = JSON.parse(decryptedString);
                                 hideModal(passwordModal);
-                                openEditor(decryptedData);
-                            } else {
-                                alert('ভুল পাসওয়ার্ড!');
-                            }
+                                noteData = JSON.parse(decryptedString);
+                                openEditor(null, noteData.title, noteData.content);
+                            } else { alert('ভুল পাসওয়ার্ড!'); }
                         };
-                        return; // Wait for password input
+                    } catch (e) { // Not encrypted
+                        noteData = JSON.parse(atob(encryptedBlob));
+                        openEditor(null, noteData.title, noteData.content);
                     }
-                    openEditor(decryptedData);
-                } catch (e) {
-                    console.error("Failed to decode note URL.", e);
-                    alert("লিংকটি সঠিক নয় বা ডামেজ হয়েছে।");
-                    window.location.hash = '';
-                    loadFromURL();
-                }
+                } catch (e) { alert("লিংকটি সঠিক নয়।"); window.location.hash = ''; loadFromURL(); }
                 return;
             }
         }
-
-        // Otherwise, treat it as a public list
-        publicNotesList = getHashData() || [];
+        // It's the public tray list
+        try { publicNotesList = JSON.parse(atob(hash || '[]')); } catch (e) { publicNotesList = []; }
         renderNotesList();
         showView(notesListView);
     }
 
-    function openEditor(data) {
-        currentNoteData = data;
-        noteTitleInput.value = currentNoteData.title;
-        noteContentTextarea.value = currentNoteData.content;
-        showView(editorView);
-    }
-
     // --- Event Listeners ---
-    newNoteBtn.addEventListener('click', () => {
-        currentNoteData = { title: 'নতুন নোট', content: '', password: '' };
-        currentNoteId = null;
-        noteTitleInput.value = currentNoteData.title;
-        noteContentTextarea.value = currentNoteData.content;
-        showView(editorView);
-    });
-
-    backToListBtn.addEventListener('click', () => {
-        window.location.hash = '';
-        loadFromURL();
-    });
-
-    saveBtn.addEventListener('click', saveToTray);
-
-    shareBtn.addEventListener('click', () => {
-        shareCustomLinkInput.value = '';
-        sharePasswordInput.value = '';
-        generatedLinkDiv.style.display = 'none';
-        showModal(shareModal);
-    });
-
+    newNoteBtn.addEventListener('click', () => openEditor(null, 'নতুন নোট', ''));
+    backToListBtn.addEventListener('click', () => { window.location.hash = ''; loadFromURL(); });
+    saveBtn.addEventListener('click', () => { savePasswordInput.value = ''; showModal(saveModal); });
+    shareBtn.addEventListener('click', () => { shareCustomLinkInput.value = ''; sharePasswordInput.value = ''; generatedLinkDiv.style.display='none'; showModal(shareModal); });
+    
+    confirmSaveBtn.addEventListener('click', saveToTray);
+    closeSaveModalBtn.addEventListener('click', () => hideModal(saveModal));
     generateLinkBtn.addEventListener('click', generateShareableLink);
     closeShareModalBtn.addEventListener('click', () => hideModal(shareModal));
+    cancelPasswordBtn.addEventListener('click', () => hideModal(passwordModal));
     
-    generatedLinkInput.addEventListener('click', () => {
-        generatedLinkInput.select();
-        navigator.clipboard.writeText(generatedLinkInput.value).then(() => {
-             alert('লিংক কপি হয়েছে!');
-        });
-    });
-
-    cancelPasswordBtn.addEventListener('click', () => {
-        hideModal(passwordModal);
-        if(!window.location.hash.startsWith('#/')) loadFromURL();
-    });
+    generatedLinkInput.addEventListener('click', () => { generatedLinkInput.select(); navigator.clipboard.writeText(generatedLinkInput.value).then(() => alert('লিংক কপি হয়েছে!')); });
 
     // --- Initial Load ---
     loadFromURL();
